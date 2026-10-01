@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="author" content="Kevin_G">
+<meta name="description" content="SPY.HQ, los juegos de Kevin_G para aprender cosas difíciles poco a poco: los dígitos de π, los países del mundo y más. Kevin_G's games to learn hard things a little at a time.">
+<!-- SPY.HQ - idea original y concepto: Kevin_G, 2026 -->
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>SPY.HQ · Kevin_G</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* El cuartel general: mismo tema "ghost purple" que los juegos. Barra lateral con los juegos; se abre con las tres rayas. */
+:root{
+  color-scheme:dark;
+  --deep:#0b0414; --deep2:#12061f; --glass:rgba(26,10,46,.62); --edge:rgba(200,132,255,.32);
+  --ghost:#c884ff; --ghost-dim:#8a4fd6; --text:#ead9ff; --muted:#9a7cc0; --on:#12061f;
+  --f-display:"Chakra Petch","Trebuchet MS",sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+  --rail:76px;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:radial-gradient(1200px 700px at 70% -10%,#2a0f4a 0%,var(--deep2) 45%,var(--deep) 100%) fixed;color:var(--text);font-family:var(--f-mono);font-size:14px;line-height:1.55}
+#rain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+a:focus-visible,button:focus-visible{outline:2px solid var(--ghost);outline-offset:3px}
+p{margin:0}
+
+/* barra lateral */
+.side{position:fixed;left:0;top:0;bottom:0;z-index:30;width:var(--rail);padding:14px;display:flex;flex-direction:column;gap:8px;overflow:hidden;
+  background:rgba(14,5,26,.9);border-right:1px solid var(--edge);backdrop-filter:blur(8px);box-shadow:inset -10px 0 30px rgba(200,132,255,.05);transition:width .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s,transform .28s}
+.side.open{width:270px;box-shadow:inset -10px 0 30px rgba(200,132,255,.06),20px 0 60px rgba(0,0,0,.6)}
+.burger{width:48px;height:48px;flex:none;border-radius:12px;border:1px solid var(--edge);background:rgba(18,6,31,.6);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;padding:0}
+.burger i{display:block;width:20px;height:2px;border-radius:2px;background:var(--ghost);box-shadow:0 0 8px var(--ghost);transition:transform .25s,opacity .25s}
+.burger:hover{box-shadow:0 0 16px rgba(200,132,255,.4)}
+.burger[aria-expanded="true"] i:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger[aria-expanded="true"] i:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] i:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.si{display:flex;align-items:center;gap:14px;min-height:48px;border-radius:12px;text-decoration:none;color:var(--text);white-space:nowrap;background:transparent;border:0;padding:0;text-align:left;width:100%}
+.si .ico{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:12px;background:rgba(200,132,255,.1);border:1px solid transparent;color:var(--ghost);transition:border-color .15s,box-shadow .15s,background .15s}
+.si:hover .ico{border-color:var(--ghost);box-shadow:0 0 16px rgba(200,132,255,.4);background:rgba(200,132,255,.16)}
+.si.on .ico{background:linear-gradient(180deg,var(--ghost),var(--ghost-dim));color:var(--on);box-shadow:0 0 18px rgba(200,132,255,.5)}
+.si.off{cursor:default}
+.si.off .ico{opacity:.55;border:1px dashed var(--edge);background:transparent}
+.si.off:hover .ico{box-shadow:none;border-color:var(--edge)}
+.si .lb{display:flex;flex-direction:column;line-height:1.2;opacity:0;transform:translateX(-6px);transition:opacity .2s,transform .2s}
+.side.open .si .lb{opacity:1;transform:none;transition-delay:.08s}
+.si .lb b{font-family:var(--f-display);letter-spacing:.06em;font-size:15px}
+.si .lb small{color:var(--muted);font-size:11px}
+.sh{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;height:14px;padding-left:4px;opacity:0;transition:opacity .2s;white-space:nowrap}
+.side.open .sh{opacity:1}
+.sep{height:1px;background:var(--edge);margin:4px 2px;flex:none}
+.grow{flex:1}
+.ico .pi{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:26px;line-height:1}
+.ico .hq{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em}
+.ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ico .mo{display:flex;gap:3px;align-items:center}
+.ico .mo i{display:block;width:5px;height:5px;border-radius:3px;background:currentColor}
+.ico .mo i.d{width:13px}
+.scrim{position:fixed;inset:0;z-index:25;background:rgba(5,2,10,.55);opacity:0;pointer-events:none;transition:opacity .28s}
+.scrim.on{opacity:1;pointer-events:auto}
+
+.app{position:relative;margin-left:var(--rail);max-width:1180px;padding:18px 26px 22px;display:flex;flex-direction:column;gap:26px;min-height:100vh}
+@media (min-width:1340px){.app{margin-inline:auto;padding-left:calc(var(--rail) + 26px)}}
+.bar{display:flex;justify-content:flex-end;align-items:center;gap:12px}
+.mburger{display:none}
+.lang{display:flex;border:1px solid var(--edge);border-radius:999px;overflow:hidden}
+.lang button{background:transparent;border:0;padding:5px 14px;font-size:12px;font-weight:700;color:var(--muted)}
+.lang button.on{background:var(--ghost);color:var(--on)}
+
+/* portada */
+.hero{text-align:center;padding:30px 0 6px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.logo{font-family:var(--f-display);font-weight:700;font-size:clamp(52px,11vw,104px);letter-spacing:.06em;line-height:.95;margin:0;text-shadow:0 0 28px rgba(200,132,255,.55)}
+.logo .ld{color:var(--ghost);text-shadow:0 0 24px var(--ghost),0 0 4px #fff}
+.logo .hq{color:transparent;-webkit-text-stroke:2px var(--ghost);text-shadow:none;filter:drop-shadow(0 0 10px rgba(200,132,255,.7))}
+.sig{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.3em;color:var(--ghost);text-shadow:0 0 12px rgba(200,132,255,.6)}
+.sig::before{content:"// ";color:var(--muted)}
+.lead{max-width:56ch;color:var(--muted);font-size:15px}
+.scan{display:inline-flex;gap:8px;align-items:center;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);border:1px solid var(--edge);border-radius:999px;padding:4px 12px;background:rgba(18,6,31,.6)}
+.scan i{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 10px #3ddc84;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sec{display:flex;flex-direction:column;gap:14px}
+.sec>h2{margin:0;display:flex;align-items:center;gap:12px}
+.sec>h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+
+/* tarjetas de juegos */
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.game{position:relative;display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:20px;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(3px);
+  box-shadow:inset 0 0 30px rgba(200,132,255,.08),0 10px 40px rgba(0,0,0,.45);text-decoration:none;color:var(--text);transition:transform .18s,box-shadow .18s,border-color .18s;overflow:hidden}
+.game::before{content:"";position:absolute;inset:-1px;background:radial-gradient(400px 200px at 50% 0%,rgba(200,132,255,.16),transparent 70%);pointer-events:none}
+a.game:hover{transform:translateY(-4px);border-color:var(--ghost);box-shadow:inset 0 0 30px rgba(200,132,255,.12),0 16px 50px rgba(0,0,0,.5),0 0 30px rgba(200,132,255,.25)}
+.emblem{height:96px;display:flex;align-items:center}
+.game h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:30px;letter-spacing:.06em;line-height:1;text-shadow:0 0 16px rgba(200,132,255,.45)}
+.game h3 .ld{color:var(--ghost)}
+.game .desc{color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags span{font-size:11px;border:1px solid var(--edge);border-radius:999px;padding:1px 9px;color:var(--muted)}
+.stat{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:14px;border-top:1px solid var(--edge)}
+.stat .rec{font-size:12px;color:var(--muted)}
+.stat .rec b{font-family:var(--f-display);font-size:20px;color:var(--text)}
+.go{font-family:var(--f-display);font-weight:700;letter-spacing:.05em;padding:8px 16px;border-radius:10px;background:linear-gradient(180deg,var(--ghost),var(--ghost-dim));color:var(--on);white-space:nowrap}
+.game.soon{border-style:dashed;background:rgba(18,6,31,.45)}
+.game.soon .go{background:transparent;color:var(--muted);border:1px solid var(--edge)}
+
+/* emblemas */
+.e-pi{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:96px;line-height:1;color:var(--ghost);text-shadow:0 0 26px var(--ghost),0 0 4px #fff}
+.e-globe{width:84px;height:84px;fill:none;stroke:var(--ghost);stroke-width:.9;filter:drop-shadow(0 0 5px rgba(200,132,255,.8));animation:spin 20s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.e-morse{display:flex;gap:9px;align-items:center}
+.e-morse .w{display:flex;gap:5px}
+.e-morse i{display:block;height:12px;width:12px;border-radius:6px;background:var(--ghost);box-shadow:0 0 10px var(--ghost);opacity:.25;animation:sig 3.6s infinite}
+.e-morse i.d{width:34px}
+@keyframes sig{0%,100%{opacity:.25}6%,22%{opacity:1}}
+.e-clock{width:86px;height:86px;fill:none;stroke:var(--ghost);stroke-width:2.2;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(200,132,255,.8))}
+.e-clock .tk{stroke-width:2}
+.e-clock .hh{stroke:var(--text);stroke-width:4;transform-origin:50px 50px;animation:spin 60s linear infinite}
+.e-clock .mm{stroke-width:3;transform-origin:50px 50px;animation:spin 5s linear infinite}
+.e-clock .c{fill:#ff6ec7;stroke:none}
+.e-ck{width:.86em;height:.86em;vertical-align:-.1em;margin-inline:.03em;fill:none;stroke:var(--ghost);stroke-width:2.2;stroke-linecap:round}
+
+footer{margin-top:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);border-top:1px solid var(--edge);padding-top:12px}
+footer b{color:var(--ghost);font-family:var(--f-display);letter-spacing:.12em;text-shadow:0 0 10px rgba(200,132,255,.5)}
+
+/* teléfono: la barra se esconde y sale con las tres rayas de arriba */
+@media (max-width:720px){
+  .side{width:270px;transform:translateX(-100%)}
+  .side.open{transform:none}
+  .side .si .lb,.side .sh{opacity:1;transform:none}
+  .app{margin-left:0;padding-inline:16px;gap:22px}
+  .bar{justify-content:space-between}
+  .mburger{display:flex}
+  .hero{padding-top:12px}
+  .game{padding:18px}.game h3{font-size:26px}
+}
+@media (prefers-reduced-motion:reduce){.e-globe,.e-morse i,.scan i,.e-clock line{animation:none}.e-morse i{opacity:1}.side,.si .lb,.scrim{transition:none}}
+</style>
+
+<canvas id="rain" aria-hidden="true"></canvas>
+
+<nav class="side" id="side" aria-label="SPY.HQ">
+  <button class="burger" id="burger" aria-expanded="false" aria-controls="side"><i></i><i></i><i></i></button>
+  <div class="sep"></div>
+  <div id="sideItems" style="display:flex;flex-direction:column;gap:8px"></div>
+  <div class="grow"></div>
+  <div class="sep"></div>
+  <div id="sideBottom" style="display:flex;flex-direction:column;gap:8px"></div>
+</nav>
+<div class="scrim" id="scrim"></div>
+
+<div class="app">
+  <div class="bar">
+    <button class="burger mburger" id="mBurger" aria-expanded="false" aria-controls="side"><i></i><i></i><i></i></button>
+    <div class="lang" role="group" aria-label="Language"><button id="lES">ES</button><button id="lEN">EN</button></div>
+  </div>
+
+  <header class="hero">
+    <span class="scan"><i></i><span id="status"></span></span>
+    <h1 class="logo" aria-label="SPY.HQ">SPY<span class="ld">.</span><span class="hq">HQ</span></h1>
+    <p class="sig">by Kevin_G</p>
+    <p class="lead" id="lead"></p>
+  </header>
+
+  <section class="sec">
+    <h2 class="eyebrow" id="gamesT"></h2>
+    <div class="games" id="games"></div>
+  </section>
+
+  <footer><span id="credits"></span><span>© 2026 <b>Kevin_G</b></span></footer>
+</div>
+
+<script>
+// cuando tengas tu página de Ko-fi, pon aquí tu usuario (lo que va después de ko-fi.com/)
+const KOFI_USER="";
+
+const GLOBE='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4.4" ry="10"/><path d="M2 12h20M3.6 7h16.8M3.6 17h16.8"/></svg>';
+const CLOCK='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6.5V12h4"/></svg>';
+const CUP='<svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>';
+const SPK_ON='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+const SPK_OFF='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 6 6M22 9l-6 6"/></svg>';
+// ... .--. -.-- = S P Y en Morse
+const SPY_MORSE=["...",".--.","-.--"];
+
+const GAMES=[
+  {id:"pie",href:"/pie-spy/",name:'<span style="font-family:Georgia,serif;font-style:italic">π</span>E<span class="ld">.</span>SPY',label:"Pie.Spy",
+   ico:'<span class="pi">π</span>',emblem:'<span class="e-pi">π</span>',
+   es:{d:"Memoriza los dígitos de π como una contraseña que crece cada día.",s:"Los dígitos de π",t:["Matemáticas","Memoria","100 decimales"],u:"dígitos"},
+   en:{d:"Memorize the digits of π like a password that grows every day.",s:"The digits of π",t:["Math","Memory","100 decimals"],u:"digits"},
+   rec:()=>{const s=read("pinkypie.v1");return s&&s.best?[s.best]:null}},
+  {id:"geo",href:"/geo-spy/",name:'GEO<span class="ld">.</span>SPY',label:"Geo.Spy",
+   ico:GLOBE,emblem:GLOBE.replace("<svg",'<svg class="e-globe"'),
+   es:{d:"Aprende los países del mundo y los estados de EE. UU. por su forma y su bandera.",s:"Países y estados",t:["Geografía","Mapa","197 países"],u:"países",u2:"estados"},
+   en:{d:"Learn every country in the world and the US states by shape and flag.",s:"Countries and states",t:["Geography","Map","197 countries"],u:"countries",u2:"states"},
+   rec:()=>{const s=read("geospy.v2");if(s&&s.sets){const w=(s.sets.world||{}).best||0,u=(s.sets.us||{}).best||0;return w||u?[w,u]:null}const o=read("geospy.v1");return o&&o.best?[o.best,0]:null}},
+  {id:"morse",href:"/morse-spy/",name:'MORSE<span class="ld">.</span>SPY',label:"Morse.Spy",
+   ico:'<span class="mo"><i></i><i class="d"></i><i></i></span>',
+   emblem:'<div class="e-morse">'+SPY_MORSE.map((w,a)=>'<span class="w">'+[...w].map((s,b)=>'<i class="'+(s==="-"?"d":"")+'" style="animation-delay:'+((a*4+b)*.22).toFixed(2)+'s"></i>').join("")+'</span>').join("")+'</div>',
+   es:{d:"Aprende a escuchar y mandar código Morse, una letra a la vez.",s:"Código Morse",t:["Código","Sonido","36 letras y números"],u:"letras"},
+   en:{d:"Learn to hear and send Morse code, one letter at a time.",s:"Morse code",t:["Code","Sound","36 characters"],u:"characters"},
+   rec:()=>{const s=read("morsespy.v1");return s&&s.best?[s.best]:null}},
+  {id:"lock",href:"/lock-spy/",name:'L<svg class="e-ck" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6.5V12h4"/></svg>CK<span class="ld">.</span>SPY',label:"Lock.Spy",
+   ico:CLOCK,emblem:'<svg class="e-clock" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/><g class="tk">'+Array.from({length:12},(_,i)=>'<line x1="50" y1="10" x2="50" y2="'+(i%3?15:18)+'" transform="rotate('+i*30+' 50 50)"/>').join("")+'</g><line class="hh" x1="50" y1="50" x2="50" y2="28"/><line class="mm" x1="50" y1="50" x2="50" y2="18"/><circle class="c" cx="50" cy="50" r="3.5"/></svg>',
+   es:{d:"Un reloj para concentrarte, con temporizador y cronómetro.",s:"Reloj para concentrarte",t:["Enfoque","Temporizador","Cronómetro"],note:"Para estudiar sin distraerte"},
+   en:{d:"A clock to help you focus, with a timer and a stopwatch.",s:"Focus clock",t:["Focus","Timer","Stopwatch"],note:"To study without distractions"},
+   rec:()=>null}
+];
+const T={
+es:{status:"Sistema en línea",lead:"Juegos para aprender cosas difíciles, un poco cada día. Elige una misión.",gamesT:"Misiones",play:"Jugar →",soon:"Próximamente",
+  noRec:"Aún no has jugado",rec:"Tu récord",menu:"Menú",home:"Inicio",missions:"Misiones",
+  kofi:"Apóyame en Ko-fi",kofiSub:"Invítame un café",kofiOff:"Ko-fi muy pronto",snd:"Sonido",sndOn:"Activado",sndOff:"Apagado",
+  credits:"Mapas: Natural Earth · Gráficos: D3 · Banderas: flagcdn.com"},
+en:{status:"System online",lead:"Games to learn hard things, a little every day. Pick a mission.",gamesT:"Missions",play:"Play →",soon:"Coming soon",
+  noRec:"Not played yet",rec:"Your record",menu:"Menu",home:"Home",missions:"Missions",
+  kofi:"Support me on Ko-fi",kofiSub:"Buy me a coffee",kofiOff:"Ko-fi coming soon",snd:"Sound",sndOn:"On",sndOff:"Off",
+  credits:"Maps: Natural Earth · Graphics: D3 · Flags: flagcdn.com"}
+};
+
+function read(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function keep(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+let lang=(()=>{try{const v=localStorage.getItem("spyhq.lang");if(v==="es"||v==="en")return v}catch(e){}return (navigator.language||"es").slice(0,2)==="en"?"en":"es"})();
+let muted=(()=>{try{return localStorage.getItem("spyhq.sound")==="off"}catch(e){return false}})();
+const $=id=>document.getElementById(id);
+
+/* ---------- sonidos (sintetizados, sin archivos) ---------- */
+let AC=null;
+function ac(){if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C()}if(AC.state==="suspended")AC.resume();return AC}
+function tone(f,dur,at=0,type="sine",vol=.07,f2){
+  if(muted)return; const a=ac(); if(!a)return;
+  const o=a.createOscillator(), g=a.createGain(), t=a.currentTime+at;
+  o.type=type; o.frequency.setValueAtTime(f,t); if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.008); g.gain.setValueAtTime(vol,t+Math.max(.01,dur-.03)); g.gain.linearRampToValueAtTime(0,t+dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+.03);
+}
+const SND={
+  // arranque: S P Y en Morse, como un radio que se enciende
+  boot(){let t=0;const u=.06;tone(180,.25,0,"sawtooth",.025,520);t=.3;SPY_MORSE.forEach(w=>{[...w].forEach(s=>{tone(760,s==="-"?u*3:u,t,"sine",.06);t+=(s==="-"?u*3:u)+u});t+=u*2})},
+  open(){tone(260,.18,0,"triangle",.06,880);tone(1320,.05,.17,"sine",.04)},
+  close(){tone(880,.16,0,"triangle",.05,240)},
+  hover(){tone(1500,.025,0,"square",.012)},
+  click(){tone(660,.06,0,"square",.03);tone(990,.09,.06,"sine",.05)},
+  toggle(){tone(520,.05,0,"sine",.05);tone(780,.07,.05,"sine",.05)}
+};
+// los navegadores no dejan sonar nada hasta que tocas la página: el arranque suena con tu primer toque
+let booted=false;
+function boot(e){
+  if(booted)return; booted=true;
+  // si el primer toque ya tiene su propio sonido (menú, juego, idioma), no se encima
+  if(e.target&&e.target.closest&&e.target.closest("button,a"))return;
+  SND.boot();
+}
+["pointerdown","keydown"].forEach(ev=>addEventListener(ev,boot,{once:true,capture:true}));
+
+/* ---------- barra lateral ---------- */
+function setSide(open,sound=true){
+  $("side").classList.toggle("open",open); $("scrim").classList.toggle("on",open);
+  $("burger").setAttribute("aria-expanded",open); $("mBurger").setAttribute("aria-expanded",open);
+  if(sound)(open?SND.open:SND.close)();
+}
+const toggleSide=()=>{booted=true;setSide(!$("side").classList.contains("open"))};
+$("burger").onclick=toggleSide; $("mBurger").onclick=toggleSide;
+$("scrim").onclick=()=>setSide(false);
+addEventListener("keydown",e=>{if(e.key==="Escape"&&$("side").classList.contains("open"))setSide(false)});
+
+function renderSide(){
+  const l=T[lang];
+  $("burger").setAttribute("aria-label",l.menu); $("burger").title=l.menu; $("mBurger").setAttribute("aria-label",l.menu);
+  let h='<a class="si on" href="./" title="SPY.HQ"><span class="ico"><span class="hq">HQ</span></span><span class="lb"><b>SPY.HQ</b><small>'+l.home+'</small></span></a>'+
+    '<span class="sh">'+l.missions+'</span>';
+  GAMES.forEach(g=>{
+    const x=g[lang], inner='<span class="ico">'+g.ico+'</span><span class="lb"><b>'+g.label+'</b><small>'+x.s+'</small></span>';
+    h+=g.href?'<a class="si go-link" href="'+g.href+'" title="'+g.label+'">'+inner+'</a>':'<span class="si off" title="'+g.label+' · '+l.soon+'">'+inner+'</span>';
+  });
+  $("sideItems").innerHTML=h;
+  $("sideBottom").innerHTML=(KOFI_USER
+      ?'<a class="si" href="https://ko-fi.com/'+encodeURIComponent(KOFI_USER)+'" target="_blank" rel="noopener" title="Ko-fi"><span class="ico">'+CUP+'</span><span class="lb"><b>Ko-fi</b><small>'+l.kofiSub+'</small></span></a>'
+      :'<span class="si off" title="'+l.kofiOff+'"><span class="ico">'+CUP+'</span><span class="lb"><b>Ko-fi</b><small>'+l.kofiOff+'</small></span></span>')+
+    '<button class="si" id="sndB" title="'+l.snd+'" aria-pressed="'+!muted+'"><span class="ico">'+(muted?SPK_OFF:SPK_ON)+'</span><span class="lb"><b>'+l.snd+'</b><small>'+(muted?l.sndOff:l.sndOn)+'</small></span></button>';
+  $("sndB").onclick=()=>{muted=!muted;keep("spyhq.sound",muted?"off":"on");SND.toggle();renderSide()};
+  wire($("side"));
+}
+
+/* ---------- portada ---------- */
+function render(){
+  const l=T[lang];
+  document.documentElement.lang=lang;
+  $("lES").className=lang==="es"?"on":""; $("lEN").className=lang==="en"?"on":"";
+  $("status").textContent=l.status; $("lead").textContent=l.lead; $("gamesT").textContent=l.gamesT;
+  $("games").innerHTML=GAMES.map(g=>{
+    const x=g[lang], r=g.rec();
+    let rec=x.note||l.noRec;
+    if(r)rec=l.rec+": <b>"+r[0]+"</b> "+x.u+(r[1]?" · <b>"+r[1]+"</b> "+x.u2:"");
+    const inner='<div class="emblem">'+g.emblem+'</div><h3>'+g.name+'</h3><p class="desc">'+x.d+'</p>'+
+      '<div class="tags">'+x.t.map(t=>'<span>'+t+'</span>').join("")+'</div>'+
+      '<div class="stat"><span class="rec">'+(g.href?rec:"")+'</span><span class="go">'+(g.href?l.play:l.soon)+'</span></div>';
+    return g.href?'<a class="game go-link" href="'+g.href+'">'+inner+'</a>':'<div class="game soon">'+inner+'</div>';
+  }).join("");
+  $("credits").textContent=l.credits;
+  wire($("games"));
+  renderSide();
+}
+// sonido al pasar por encima y al entrar a un juego
+function wire(root){
+  root.querySelectorAll("a.go-link,.si:not(.off)").forEach(a=>{
+    a.addEventListener("pointerenter",e=>{if(e.pointerType==="mouse")SND.hover()});
+  });
+  root.querySelectorAll("a.go-link").forEach(a=>a.addEventListener("click",e=>{
+    if(muted||e.ctrlKey||e.metaKey||e.shiftKey||e.button)return;
+    e.preventDefault(); booted=true; SND.click(); setTimeout(()=>{location.href=a.href},170);
+  }));
+}
+const setLang=v=>{lang=v;keep("spyhq.lang",v);SND.toggle();render()};
+$("lES").onclick=()=>setLang("es"); $("lEN").onclick=()=>setLang("en");
+
+/* ---------- lluvia: π, coordenadas y señales mezcladas ---------- */
+(function(){
+  const c=$("rain"), x=c.getContext("2d"), G="π∑√⊕°NSEW·−✦", still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // semilla de la lluvia (una columna sigue su propio ritmo)
+  const SEED="aGVjaG8gcG9yIGtldmluX0dvQXQgb1IgWk9OZSwgcGVhY2U=", B=[...atob(SEED)].flatMap(ch=>[...ch.charCodeAt(0).toString(2).padStart(8,"0")]);
+  let cols=[], W, H, K=0, bi=0;
+  function fit(){W=c.width=innerWidth;H=c.height=innerHeight;cols=Array.from({length:Math.ceil(W/26)},()=>Math.random()*H);K=Math.floor(cols.length*.38)}
+  function draw(){
+    x.fillStyle="rgba(11,4,20,.16)";x.fillRect(0,0,W,H);
+    x.font="16px Consolas,monospace";
+    cols.forEach((y,i)=>{
+      x.fillStyle=Math.random()<.08?"rgba(234,217,255,.7)":"rgba(138,79,214,.45)";
+      let ch=G[Math.floor(Math.random()*G.length)];
+      if(i===K){ch=bi?(B[bi-1]==="1"?"−":"·"):"✦";bi=(bi+1)%(B.length+1)}
+      x.fillText(ch,i*26+6,y);
+      cols[i]=y>H+Math.random()*400?0:y+22;
+    });
+  }
+  fit();addEventListener("resize",fit);
+  if(still){for(let i=0;i<40;i++)draw()}else setInterval(draw,90);
+})();
+
+render();
+</script>
+</html>

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="author" content="Kevin_G">
+<meta name="description" content="Lock.Spy, de Kevin_G: un reloj para concentrarte, con temporizador y cronómetro. A focus clock with a timer and a stopwatch.">
+<!-- Lock.Spy - idea original y concepto: Kevin_G, 2026 -->
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Lock.Spy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Mismo tema que los otros juegos. Un reloj grande en medio; temporizador a la izquierda y cronómetro a la derecha. */
+:root{
+  color-scheme:dark;
+  --deep:#0b0414; --deep2:#12061f; --glass:rgba(26,10,46,.62); --edge:rgba(200,132,255,.32);
+  --ghost:#c884ff; --ghost-dim:#8a4fd6; --text:#ead9ff; --muted:#9a7cc0;
+  --ok:#3ddc84; --bad:#ff2a4a; --on:#12061f; --pink:#ff6ec7;
+  --f-display:"Chakra Petch","Trebuchet MS",sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:radial-gradient(1200px 700px at 70% -10%,#2a0f4a 0%,var(--deep2) 45%,var(--deep) 100%) fixed;color:var(--text);font-family:var(--f-mono);font-size:14px;line-height:1.5}
+#rain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.45}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ghost);outline-offset:2px}
+p{margin:0}
+
+.app{position:relative;display:flex;flex-direction:column;gap:16px;padding-inline:22px;padding-block:16px;min-height:100%;max-width:1400px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:relative;z-index:20}
+.logo{font-family:var(--f-display);font-weight:700;font-size:40px;letter-spacing:.06em;line-height:1;display:flex;align-items:center;margin:0;text-shadow:0 0 18px rgba(200,132,255,.55)}
+/* la O es un relojito */
+.logo .ck{width:.86em;height:.86em;margin-inline:.04em .06em;filter:drop-shadow(0 0 6px var(--ghost)) drop-shadow(0 0 1px #fff)}
+.logo .ck circle{fill:none;stroke:var(--ghost);stroke-width:2}
+.logo .ck line{stroke:var(--ghost);stroke-width:2;stroke-linecap:round}
+.logo .ck .mh{transform-origin:12px 12px;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo .ld{color:var(--ghost)}
+.tag{color:var(--muted);font-size:13px}
+.sig{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.22em;color:var(--ghost);text-shadow:0 0 12px rgba(200,132,255,.6);margin:6px 0 4px 2px}
+.sig::before{content:"// ";color:var(--muted)}
+.hright{display:flex;align-items:center;gap:12px}
+footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);border-top:1px solid var(--edge);padding-top:10px}
+footer b{color:var(--ghost);font-family:var(--f-display);letter-spacing:.12em;text-shadow:0 0 10px rgba(200,132,255,.5)}
+.lang{display:flex;border:1px solid var(--edge);border-radius:999px;overflow:hidden}
+.lang button{background:transparent;border:0;padding:5px 14px;font-size:12px;font-weight:700;color:var(--muted)}
+.lang button.on{background:var(--ghost);color:var(--on)}
+.iconb{width:42px;height:38px;border-radius:10px;border:1px solid var(--edge);background:rgba(18,6,31,.6);display:grid;place-items:center;color:var(--ghost)}
+.iconb:hover{box-shadow:0 0 16px rgba(200,132,255,.4)}
+.iconb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* menú de tres rayas */
+.menuwrap{position:relative}
+@media (max-width:600px){.menuwrap{position:static}}
+.burger{width:42px;height:38px;border-radius:10px;border:1px solid var(--edge);background:rgba(18,6,31,.6);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;padding:0}
+.burger i{display:block;width:20px;height:2px;border-radius:2px;background:var(--ghost);box-shadow:0 0 8px var(--ghost);transition:transform .2s,opacity .2s}
+.burger:hover{box-shadow:0 0 16px rgba(200,132,255,.4)}
+.burger[aria-expanded="true"] i:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger[aria-expanded="true"] i:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] i:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.menu{position:absolute;right:0;top:calc(100% + 10px);width:min(310px,calc(100vw - 32px));padding:14px;border-radius:16px;border:1px solid var(--edge);background:rgba(18,6,31,.97);box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 30px rgba(200,132,255,.15);display:flex;flex-direction:column;gap:8px}
+.mi{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:9px 10px;border-radius:12px;border:1px solid transparent;color:var(--text);text-decoration:none;font-size:13px}
+.mi:hover{border-color:var(--edge);background:rgba(200,132,255,.08)}
+.mi.on{border-color:var(--edge);background:rgba(200,132,255,.1);cursor:default}
+.mi .ico{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:rgba(200,132,255,.14);color:var(--ghost);font-weight:700}
+.mi .ico.pi{font-family:Georgia,serif;font-style:italic;font-size:22px}
+.mi .ico.hq{font-family:var(--f-display);font-size:13px}
+.mi .ico svg{width:22px;height:22px;fill:none;stroke:var(--ghost);stroke-width:1.7;stroke-linecap:round}
+.mi .ico .mo{display:flex;gap:2px;align-items:center}.mi .ico .mo i{display:block;width:4px;height:4px;border-radius:2px;background:var(--ghost)}.mi .ico .mo i.d{width:10px}
+.mi b{display:block;font-family:var(--f-display);letter-spacing:.05em}
+.mi small{display:block;color:var(--muted);font-size:11px}
+
+/* relojes */
+.box{background:var(--glass);border:1px solid var(--edge);border-radius:22px;backdrop-filter:blur(3px);box-shadow:inset 0 0 30px rgba(200,132,255,.08),0 10px 40px rgba(0,0,0,.45)}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 24px}
+.clocks{width:100%;display:grid;grid-template-columns:minmax(200px,1fr) minmax(280px,520px) minmax(200px,1fr);grid-template-areas:"timer big sw";align-items:center;gap:28px}
+.bigwrap{grid-area:big;display:flex;flex-direction:column;align-items:center;gap:10px}
+.big{width:100%;max-width:520px;aspect-ratio:1;display:block;overflow:visible}
+.face{fill:rgba(18,6,31,.75);stroke:var(--ghost);stroke-width:2.5;filter:drop-shadow(0 0 14px rgba(200,132,255,.55))}
+.face2{fill:none;stroke:rgba(200,132,255,.18);stroke-width:1}
+.tick{stroke:rgba(200,132,255,.4);stroke-width:1.2;stroke-linecap:round}
+.tick.h{stroke:var(--ghost);stroke-width:3;filter:drop-shadow(0 0 4px var(--ghost))}
+.num{fill:var(--text);font-family:var(--f-display);font-weight:700;font-size:22px;text-anchor:middle;dominant-baseline:central}
+.num.q{fill:var(--ghost);font-size:28px;filter:drop-shadow(0 0 6px rgba(200,132,255,.8))}
+.hand{stroke-linecap:round}
+.hand.h{stroke:var(--text);stroke-width:7;filter:drop-shadow(0 0 6px rgba(200,132,255,.6))}
+.hand.m{stroke:var(--ghost);stroke-width:4.5;filter:drop-shadow(0 0 6px var(--ghost))}
+.hand.s{stroke:var(--pink);stroke-width:1.8;filter:drop-shadow(0 0 5px var(--pink))}
+.hub{fill:var(--pink);stroke:var(--on);stroke-width:2}
+.dtime{fill:var(--text);font-family:var(--f-display);font-weight:700;font-size:34px;text-anchor:middle;letter-spacing:.04em}
+.dsec{fill:var(--muted);font-family:var(--f-mono);font-size:14px;text-anchor:middle}
+.dap{fill:var(--ghost);font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.2em;text-anchor:middle}
+.date{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+.dial{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 16px;border-radius:20px;border:1px solid var(--edge);background:rgba(18,6,31,.55);box-shadow:inset 0 0 24px rgba(200,132,255,.06)}
+.dial.timer{grid-area:timer}.dial.sw{grid-area:sw}
+.dial .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ring{width:170px;max-width:100%;aspect-ratio:1;display:block}
+.ring .track{fill:rgba(18,6,31,.7);stroke:rgba(200,132,255,.15);stroke-width:7}
+.ring .prog{fill:none;stroke:var(--ghost);stroke-width:7;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50px 50px;transition:stroke .3s}
+.ring{filter:drop-shadow(0 0 5px rgba(200,132,255,.45))}
+.ring .t{fill:var(--text);font-family:var(--f-display);font-weight:700;font-size:19px;text-anchor:middle;dominant-baseline:central;letter-spacing:.02em}
+.ring .t2{fill:var(--muted);font-family:var(--f-mono);font-size:8px;text-anchor:middle}
+.dial.run .prog{stroke:var(--ok)}
+.dial.run .ring{filter:drop-shadow(0 0 6px rgba(61,220,132,.55))}
+.dial.ring-done .prog{stroke:var(--bad)}
+.dial.ring-done .t{fill:#ff9aab;animation:flash .6s steps(2) infinite}
+@keyframes flash{50%{opacity:.25}}
+.row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.btn{border:0;background:linear-gradient(180deg,var(--ghost),var(--ghost-dim));color:var(--on);padding:8px 16px;border-radius:10px;font-weight:700;min-width:96px}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--edge);min-width:0}
+.btn.sm{padding:4px 10px;font-size:12px;min-width:0}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.chips button{background:transparent;border:1px solid var(--edge);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--muted)}
+.chips button.on{background:var(--ghost);color:var(--on);border-color:transparent}
+
+/* modo enfoque: solo los relojes */
+body.focus header,body.focus footer{display:none}
+body.focus .app{max-width:none}
+body.focus .main{border-color:transparent;background:transparent;box-shadow:none;backdrop-filter:none}
+.exitf{position:fixed;top:14px;right:14px;z-index:30}
+
+@media (max-width:860px){
+  .app{padding-inline:16px}.logo{font-size:30px}
+  .main{padding:20px 14px}
+  .clocks{grid-template-columns:1fr 1fr;grid-template-areas:"big big" "timer sw";gap:16px}
+  .big{max-width:420px}
+  .ring{width:130px}
+  .dial{padding:14px 10px;align-self:stretch}
+}
+@media (prefers-reduced-motion:reduce){.logo .ck .mh,.dial.ring-done .t{animation:none}}
+</style>
+
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="app">
+  <header>
+    <div>
+      <h1 class="logo" aria-label="Lock.Spy">L<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="6.5"/><line class="mh" x1="12" y1="12" x2="16" y2="12"/></svg>CK<span class="ld">.</span>SPY</h1>
+      <p class="sig">by Kevin_G</p>
+      <p class="tag" id="tag"></p>
+    </div>
+    <div class="hright">
+      <div class="lang" role="group" aria-label="Language"><button id="lES">ES</button><button id="lEN">EN</button></div>
+      <button class="iconb" id="focusB"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <div class="menuwrap">
+        <button class="burger" id="burger" aria-expanded="false" aria-controls="menu"><i></i><i></i><i></i></button>
+        <div class="menu" id="menu" hidden></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="box main" id="main">
+    <div class="clocks">
+      <section class="dial timer" id="timerBox" aria-labelledby="tL">
+        <span class="eyebrow" id="tL"></span>
+        <svg class="ring" viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="44"/><circle class="prog" id="tProg" cx="50" cy="50" r="44"/><text class="t" id="tTxt" x="50" y="48"></text><text class="t2" id="tSub" x="50" y="66"></text></svg>
+        <div class="row chips" id="tPresets"></div>
+        <div class="row"><button class="btn ghost sm" id="tMinus">−1 min</button><button class="btn ghost sm" id="tPlus">+1 min</button></div>
+        <div class="row"><button class="btn" id="tGo"></button><button class="btn ghost" id="tReset"></button></div>
+      </section>
+
+      <div class="bigwrap">
+        <svg class="big" id="big" viewBox="0 0 300 300" role="img"></svg>
+        <span class="date" id="date"></span>
+      </div>
+
+      <section class="dial sw" id="swBox" aria-labelledby="sL">
+        <span class="eyebrow" id="sL"></span>
+        <svg class="ring" viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="44"/><circle class="prog" id="sProg" cx="50" cy="50" r="44"/><text class="t" id="sTxt" x="50" y="48"></text><text class="t2" id="sSub" x="50" y="66"></text></svg>
+        <div class="row"><button class="btn" id="sGo"></button><button class="btn ghost" id="sReset"></button></div>
+      </section>
+    </div>
+  </main>
+
+  <footer><span id="foot"></span><span>© 2026 <b>Kevin_G</b></span></footer>
+</div>
+<button class="iconb exitf" id="exitF" hidden><svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
+
+<script>
+const T={
+es:{tag:"Un reloj para concentrarte, con temporizador y cronómetro.",idea:"LOCK.SPY · idea original y concepto de",timer:"Temporizador",sw:"Cronómetro",
+  start:"Iniciar",pause:"Pausa",resume:"Seguir",reset:"Reiniciar",stop:"Detener",done:"¡Tiempo!",left:"restante",paused:"en pausa",running:"corriendo",ready:"listo",
+  focus:"Modo enfoque",exitFocus:"Salir del modo enfoque",days:["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],
+  months:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
+  menu:"Menú",games:"Juegos de Kevin_G",here:"Estás aquí",hqSub:"Todos los juegos",piSub:"Memoriza π como una contraseña",geoSub:"Países y estados por forma y bandera",moSub:"Aprende código Morse"},
+en:{tag:"A clock to help you focus, with a timer and a stopwatch.",idea:"LOCK.SPY · original idea and concept by",timer:"Timer",sw:"Stopwatch",
+  start:"Start",pause:"Pause",resume:"Resume",reset:"Reset",stop:"Stop",done:"Time's up!",left:"left",paused:"paused",running:"running",ready:"ready",
+  focus:"Focus mode",exitFocus:"Exit focus mode",days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+  months:["January","February","March","April","May","June","July","August","September","October","November","December"],
+  menu:"Menu",games:"Kevin_G games",here:"You are here",hqSub:"All the games",piSub:"Memorize π like a password",geoSub:"Countries and states by shape and flag",moSub:"Learn Morse code"}
+};
+const KEY="lockspy.v1", PRESETS=[1,5,10,25,45], MIN=60000, $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+// el temporizador guarda la hora en que termina, así sigue bien aunque cierres la pestaña
+let S=load()||{};
+S.lang=S.lang==="en"||S.lang==="es"?S.lang:((navigator.language||"es").slice(0,2)==="en"?"en":"es");
+S.t=Object.assign({dur:25*MIN,left:25*MIN,endAt:null},S.t||{});
+S.s=Object.assign({acc:0,startAt:null},S.s||{});
+const L=()=>T[S.lang];
+let ringing=false;
+
+/* ---------- sonido ---------- */
+let AC=null;
+function ac(){if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C()}if(AC.state==="suspended")AC.resume();return AC}
+function beep(f,dur,at=0,vol=.12){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+at;o.type="sine";o.frequency.value=f;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.setValueAtTime(vol,t+dur-.03);g.gain.linearRampToValueAtTime(0,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.02)}
+const click=()=>{beep(660,.05,0,.05);beep(990,.07,.05,.05)};
+let alarmT=null;
+function alarm(){ // tres pitidos cada segundo, hasta que lo detengas (máximo 30 s)
+  let n=0; stopAlarm();
+  const ring=()=>{if(!ringing||n++>=30)return stopAlarm();[0,.18,.36].forEach(x=>beep(880,.12,x,.14));alarmT=setTimeout(ring,1000)};
+  ring();
+}
+function stopAlarm(){clearTimeout(alarmT);alarmT=null}
+
+/* ---------- reloj grande ---------- */
+(function build(){
+  let h='<circle class="face" cx="150" cy="150" r="140"/><circle class="face2" cx="150" cy="150" r="124"/>';
+  for(let i=0;i<60;i++){
+    const a=i*6*Math.PI/180, hr=i%5===0, r1=hr?118:124, r2=134;
+    h+='<line class="tick'+(hr?' h':'')+'" x1="'+(150+r1*Math.sin(a)).toFixed(1)+'" y1="'+(150-r1*Math.cos(a)).toFixed(1)+'" x2="'+(150+r2*Math.sin(a)).toFixed(1)+'" y2="'+(150-r2*Math.cos(a)).toFixed(1)+'"/>';
+  }
+  for(let n=1;n<=12;n++){const a=n*30*Math.PI/180;h+='<text class="num'+(n%3===0?' q':'')+'" x="'+(150+100*Math.sin(a)).toFixed(1)+'" y="'+(150-100*Math.cos(a)).toFixed(1)+'">'+n+'</text>'}
+  h+='<text class="dap" id="dAp" x="150" y="94"></text><text class="dtime" id="dTime" x="150" y="212"></text><text class="dsec" id="dSec" x="150" y="232"></text>'+
+    '<line class="hand h" id="hH" x1="150" y1="164" x2="150" y2="88"/><line class="hand m" id="hM" x1="150" y1="170" x2="150" y2="50"/>'+
+    '<line class="hand s" id="hS" x1="150" y1="178" x2="150" y2="36"/><circle class="hub" cx="150" cy="150" r="6"/>';
+  $("big").innerHTML=h;
+})();
+const pad=n=>String(n).padStart(2,"0");
+function drawClock(now){
+  const d=new Date(now), ms=d.getMilliseconds(), s=d.getSeconds()+ms/1000, m=d.getMinutes()+s/60, h=d.getHours()%12+m/60;
+  $("hH").setAttribute("transform","rotate("+(h*30)+" 150 150)");
+  $("hM").setAttribute("transform","rotate("+(m*6)+" 150 150)");
+  $("hS").setAttribute("transform","rotate("+(s*6)+" 150 150)");
+  const H=d.getHours()%12||12, txt=H+":"+pad(d.getMinutes());
+  if($("dTime").textContent!==txt)$("dTime").textContent=txt;
+  $("dSec").textContent=pad(d.getSeconds());
+  $("dAp").textContent=d.getHours()<12?"AM":"PM";
+}
+function drawDate(){const d=new Date(),l=L();$("date").textContent=S.lang==="en"?l.days[d.getDay()]+", "+l.months[d.getMonth()]+" "+d.getDate():l.days[d.getDay()]+" "+d.getDate()+" de "+l.months[d.getMonth()]}
+
+/* ---------- temporizador ---------- */
+const C=2*Math.PI*44;
+["tProg","sProg"].forEach(id=>$(id).setAttribute("stroke-dasharray",C.toFixed(2)));
+const tLeft=now=>S.t.endAt?Math.max(0,S.t.endAt-now):S.t.left;
+const fmt=ms=>{const t=Math.ceil(ms/1000),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return (h?h+":"+pad(m):pad(m))+":"+pad(s)};
+function drawTimer(now){
+  const l=L(), left=tLeft(now);
+  if(S.t.endAt&&left<=0){S.t.endAt=null;S.t.left=0;ringing=true;save();alarm();renderControls()}
+  $("tTxt").textContent=fmt(left);
+  $("tSub").textContent=ringing?l.done:S.t.endAt?l.left:left<S.t.dur?l.paused:l.ready;
+  $("tProg").setAttribute("stroke-dashoffset",(C*(1-left/S.t.dur)).toFixed(2));
+  $("timerBox").classList.toggle("run",!!S.t.endAt); $("timerBox").classList.toggle("ring-done",ringing);
+}
+function tGo(){
+  ac(); click();
+  if(ringing){ringing=false;stopAlarm();S.t.left=S.t.dur}
+  else if(S.t.endAt){S.t.left=Math.max(0,S.t.endAt-Date.now());S.t.endAt=null}
+  else{if(S.t.left<=0)S.t.left=S.t.dur;S.t.endAt=Date.now()+S.t.left}
+  save(); renderControls();
+}
+function tReset(){click();ringing=false;stopAlarm();S.t.endAt=null;S.t.left=S.t.dur;save();renderControls()}
+function tSet(ms){ringing=false;stopAlarm();S.t.dur=Math.max(MIN,Math.min(180*MIN,ms));S.t.left=S.t.dur;S.t.endAt=null;save();renderControls()}
+function tAdd(d){
+  click();
+  if(S.t.endAt){S.t.endAt=Math.max(Date.now()+1000,S.t.endAt+d);S.t.dur=Math.max(S.t.dur,S.t.endAt-Date.now());save();return}
+  tSet(S.t.dur+d);
+}
+
+/* ---------- cronómetro ---------- */
+const sEl=now=>S.s.acc+(S.s.startAt?now-S.s.startAt:0);
+function fmtSw(ms){const cs=Math.floor(ms/10)%100,t=Math.floor(ms/1000),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h?h+":"+pad(m)+":"+pad(s):pad(m)+":"+pad(s)+"."+pad(cs)}
+function drawSw(now){
+  const l=L(), e=sEl(now);
+  $("sTxt").textContent=fmtSw(e);
+  $("sSub").textContent=S.s.startAt?l.running:e?l.paused:l.ready;
+  $("sProg").setAttribute("stroke-dashoffset",(C*(1-(e%60000)/60000)).toFixed(2)); // da una vuelta por minuto
+  $("swBox").classList.toggle("run",!!S.s.startAt);
+}
+function sGo(){ac();click();if(S.s.startAt){S.s.acc+=Date.now()-S.s.startAt;S.s.startAt=null}else S.s.startAt=Date.now();save();renderControls()}
+function sReset(){click();S.s={acc:0,startAt:null};save();renderControls()}
+
+/* ---------- textos y botones ---------- */
+function renderControls(){
+  const l=L(), left=tLeft(Date.now());
+  $("tGo").textContent=ringing?l.stop:S.t.endAt?l.pause:left<S.t.dur&&left>0?l.resume:l.start;
+  $("sGo").textContent=S.s.startAt?l.pause:sEl(Date.now())?l.resume:l.start;
+  $("tPresets").innerHTML=PRESETS.map(m=>'<button data-m="'+m+'"'+(S.t.dur===m*MIN?' class="on"':'')+'>'+m+'</button>').join("");
+  $("tPresets").querySelectorAll("button").forEach(b=>b.onclick=()=>{click();tSet(+b.dataset.m*MIN)});
+}
+function render(){
+  const l=L();
+  document.documentElement.lang=S.lang;
+  $("tag").textContent=l.tag; $("foot").innerHTML=l.idea+" <b>Kevin_G</b>";
+  $("tL").textContent=l.timer; $("sL").textContent=l.sw; $("tReset").textContent=l.reset; $("sReset").textContent=l.reset;
+  $("focusB").title=l.focus; $("focusB").setAttribute("aria-label",l.focus); $("exitF").title=l.exitFocus; $("exitF").setAttribute("aria-label",l.exitFocus);
+  $("lES").className=S.lang==="es"?"on":""; $("lEN").className=S.lang==="en"?"on":"";
+  drawDate(); renderControls(); renderMenu();
+}
+const GLOBE='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4.4" ry="10"/><path d="M2 12h20M3.6 7h16.8M3.6 17h16.8"/></svg>';
+const CLOCK='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6.5V12h4"/></svg>';
+function renderMenu(){
+  const l=L();
+  $("burger").setAttribute("aria-label",l.menu);
+  $("menu").innerHTML='<span class="eyebrow" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700">'+l.games+'</span>'+
+    '<a class="mi" href="/"><span class="ico hq">HQ</span><span><b>SPY.HQ</b><small>'+l.hqSub+'</small></span></a>'+
+    '<a class="mi" href="/pie-spy/"><span class="ico pi">π</span><span><b>Pie.Spy</b><small>'+l.piSub+'</small></span></a>'+
+    '<a class="mi" href="/geo-spy/"><span class="ico">'+GLOBE+'</span><span><b>Geo.Spy</b><small>'+l.geoSub+'</small></span></a>'+
+    '<a class="mi" href="/morse-spy/"><span class="ico"><span class="mo"><i></i><i class="d"></i><i></i></span></span><span><b>Morse.Spy</b><small>'+l.moSub+'</small></span></a>'+
+    '<div class="mi on"><span class="ico">'+CLOCK+'</span><span><b>Lock.Spy</b><small>'+l.here+'</small></span></div>';
+}
+function toggleMenu(open){$("menu").hidden=!open;$("burger").setAttribute("aria-expanded",open)}
+
+/* modo enfoque: pantalla completa, solo los relojes */
+function setFocus(on){
+  document.body.classList.toggle("focus",on); $("exitF").hidden=!on;
+  try{if(on&&!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}
+}
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("focus"))setFocus(false)});
+
+$("tGo").onclick=tGo; $("tReset").onclick=tReset; $("tMinus").onclick=()=>tAdd(-MIN); $("tPlus").onclick=()=>tAdd(MIN);
+$("sGo").onclick=sGo; $("sReset").onclick=sReset;
+$("focusB").onclick=()=>setFocus(true); $("exitF").onclick=()=>setFocus(false);
+$("lES").onclick=()=>{S.lang="es";save();render()};
+$("lEN").onclick=()=>{S.lang="en";save();render()};
+$("burger").onclick=e=>{e.stopPropagation();toggleMenu($("menu").hidden)};
+document.addEventListener("click",e=>{if(!$("menu").hidden&&!e.target.closest(".menuwrap"))toggleMenu(false)});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(!$("menu").hidden)toggleMenu(false);else if(document.body.classList.contains("focus"))setFocus(false)}
+});
+
+/* ---------- bucle ---------- */
+let lastDate=new Date().getDate();
+function frame(){
+  const now=Date.now();
+  drawClock(now); drawTimer(now); drawSw(now);
+  if(new Date().getDate()!==lastDate){lastDate=new Date().getDate();drawDate()}
+  requestAnimationFrame(frame);
+}
+// en segundo plano el navegador frena la animación: esto revisa el temporizador y pone el tiempo en la pestaña
+setInterval(()=>{
+  const now=Date.now(); drawTimer(now);
+  document.title=ringing?"⏰ "+L().done:S.t.endAt?fmt(tLeft(now))+" · Lock.Spy":"Lock.Spy";
+},250);
+
+/* ---------- lluvia de números ---------- */
+(function(){
+  const c=$("rain"), x=c.getContext("2d"), G="0123456789:◴◵◶◷", still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // semilla de la lluvia (una columna sigue su propio ritmo)
+  const SEED="aGVjaG8gcG9yIGtldmluX0dvQXQgb1IgWk9OZSwgcGVhY2U=", B=[...atob(SEED)].flatMap(ch=>[...ch.charCodeAt(0).toString(2).padStart(8,"0")]);
+  let cols=[], W, H, K=0, bi=0;
+  function fit(){W=c.width=innerWidth;H=c.height=innerHeight;cols=Array.from({length:Math.ceil(W/26)},()=>Math.random()*H);K=Math.floor(cols.length*.38)}
+  function draw(){
+    x.fillStyle="rgba(11,4,20,.16)";x.fillRect(0,0,W,H);
+    x.font="16px Consolas,monospace";
+    cols.forEach((y,i)=>{
+      x.fillStyle=Math.random()<.08?"rgba(234,217,255,.7)":"rgba(138,79,214,.45)";
+      let ch=G[Math.floor(Math.random()*G.length)];
+      if(i===K){ch=bi?B[bi-1]:":";bi=(bi+1)%(B.length+1)}
+      x.fillText(ch,i*26+6,y);
+      cols[i]=y>H+Math.random()*400?0:y+22;
+    });
+  }
+  fit();addEventListener("resize",fit);
+  if(still){for(let i=0;i<40;i++)draw()}else setInterval(draw,90);
+})();
+
+render(); requestAnimationFrame(frame);
+</script>
+</html>
